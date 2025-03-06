@@ -1,0 +1,7 @@
+*.xml
+.benchmarks
+.venv/
+__pycache__/
+htmlcov
+.coverage
+.idea/
