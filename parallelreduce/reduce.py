@@ -31,7 +31,8 @@ def parallel_reduce(fn, data, initial=__initial_missing, chunk_size=None, max_wo
     :param max_workers: Total number of processes to spawn.
     :return:
     """
-    workers = max_workers if max_workers else multiprocessing.cpu_count()
+    # if max_workers is not specified; reduce # of CPU by 1 as there will be one CPU aggregating the futures as it goes
+    workers = max_workers if max_workers else multiprocessing.cpu_count() - 1
 
     # exception cases if the length of the data is not sufficient to start the parallel procssing.
     if len(data) == 0:
@@ -46,7 +47,7 @@ def parallel_reduce(fn, data, initial=__initial_missing, chunk_size=None, max_wo
     if chunk_size is None:
         chunk_size = math.ceil(max(math.sqrt(len(data)), len(data) / (TARGET_PARTITIONS_PER_CPU * workers)))
 
-    with concurrent.futures.ProcessPoolExecutor(max_workers=workers - 1) as executor:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
         if initial is __initial_missing:
             result_futures = [executor.submit(reduce, fn, sublst) for sublst in __chunk_list(data, chunk_size)]
         else:
