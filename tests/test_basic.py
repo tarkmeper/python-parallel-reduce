@@ -24,8 +24,19 @@ def test_smaller_than_chunk():
 def test_large_data_set():
     assert parallelreduce.parallel_reduce(_test_func, list(range(1000))) == 499500
 
+
 def test_large_data_set_init():
     assert parallelreduce.parallel_reduce(_test_func, list(range(1000)), 0) == 499500
+
+
+def _prime_factors(x):
+    # find all the  prime factors of x
+    divisor = 2
+    while x > 1:
+        while x % divisor == 0:
+            yield divisor
+            x //= divisor
+        divisor += 1
 
 
 def _complex_test_func(x, y):
@@ -33,21 +44,13 @@ def _complex_test_func(x, y):
     # we are going to count how many prime factors exist for all the numbers in the range.
     if isinstance(y, dict):
         for k in y:
-            if k not in x:
-                x[k] = y[k]
-            else:
-                x[k] += y[k]
+            x[k] = y[k] if k not in x else x[k] + y[k]
     else:
-        # find all the  prime factors of y
-        divisor = 2
-        while y > 1:
-            while y % divisor == 0:
-                if divisor not in x:
-                    x[divisor] = 1
-                else:
-                    x[divisor] += 1
-                y //= divisor
-            divisor += 1
+        for divisor in _prime_factors(y):
+            if divisor not in x:
+                x[divisor] = 1
+            else:
+                x[divisor] += 1
     return x
 
 
